@@ -52,10 +52,11 @@ d3.select(window).on('load', () => {
   const simulation = d3.forceSimulation()
     .force("link", d3.forceLink()
       .id(function(d) { return d.id; })
-      .distance(d => d.distance * 2)
+      .distance(d => d.distance * 1.3)
       .iterations(10))
     .force("charge", d3.forceManyBody()
-      .strength(-30))
+      .strength(-100)
+      .distanceMin(30))
     .force("collission", d3.forceCollide(20))
     .force("center", d3.forceCenter(width / 2, height / 2));
 
@@ -69,14 +70,23 @@ d3.select(window).on('load', () => {
     const links = [];
     function expandNode(node) {
       if (!node.hasOwnProperty('visited')) {
+        const link = links[node.index]
+        const parent = link ? (link.source.id == node.id ? link.target : link.source) : null;
+
         node.similars.map(t => {
             const target = songs[t[1]]
             // Insert the song as a node (if it doesn't already exist) and
             // return all the links
             if (!nodeSet.has(target.id) && target.id != node.id) {
               nodeSet.add(target.id)
-              target.x = node.x + Math.random() * 20
-              target.y = node.y + Math.random() * 20
+
+              if (parent) {
+                target.x = node.x + (node.x - parent.x) * 0.5 + Math.random() * 5;
+                target.y = node.y + (node.y - parent.y) * 0.5 + Math.random() * 5;
+              } else {
+                target.x = (Math.random() - 0.5) * 40
+                target.y = (Math.random() - 0.5) * 40
+              }
               nodes.push(target)
               links.push({distance: t[0], source: node, "target": target})
             }

@@ -32,7 +32,15 @@ margin-left: -20vw;
   stroke-width: 1.5px;
 }
 circle.node.expanded {
-  fill: orange;
+  fill: #DD9611;
+}
+circle.node.closed {
+  fill: #622;
+  stroke: #ccc;
+  stroke-width: 6px;
+}
+circle.node.closed:hover {
+  cursor: pointer;
 }
 </style>
 <script type="text/javascript">
@@ -44,6 +52,12 @@ d3.select(window).on('load', () => {
   const svg = d3.select("#svg")
     .attr("width", width)
     .attr("height", height)
+    .call(d3.zoom().on("zoom", () => {
+      svg.attr("transform", () => {
+        return d3.event.transform
+      })
+    }))
+    .append("g")
 
   var svg_link = svg.append("g")
     .attr("class", "links")
@@ -56,7 +70,7 @@ d3.select(window).on('load', () => {
     .force("link", d3.forceLink()
       .id(function(d) { return d.id; })
       .distance(d => d.distance)
-      .iterations(3))
+      .iterations(1))
     .force("charge", d3.forceManyBody()
       .strength(-100)
       .distanceMin(30))
@@ -117,7 +131,7 @@ d3.select(window).on('load', () => {
       var shouldRender = true;
       simulation.nodes(nodes).on("tick", ticked);
       simulation.force("link").links(links);
-      simulation.alpha(1).alphaTarget(0).restart()
+      simulation.alpha(1).restart()
 
       // Create links
       svg_link = svg_link.data(links);
@@ -142,7 +156,7 @@ d3.select(window).on('load', () => {
       // Update nodes
       svg.selectAll(".node")
         .attr("class", d => "node " + (d.visited ? "expanded" : "closed"))
-        .attr("r", d => d.visited ? 10 : 5)
+        .attr("r", d => d.visited ? 12 : 10)
     };
 
     expandNode(nodes[0])

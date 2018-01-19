@@ -228,5 +228,13 @@ d3.select(window).on('load', () => {
 </script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js">
 </script>
+
+<h2>The visualization</h2>
+<p>The Music Cloud is an interactive visualization that shows the genre relatinship between different songs. Each node in the graph represents a song and links to the 10 closest related songs in the data set. The distance of the links between each node represents the degree of similarity. The initial graph shows the first song of the data set and its 10 most similar song. Clicking on one of the song nodes will expand the node with the 10 songs most similar to the selected song and so on. Using the search bar the user can search for a song in the data set and set that song as center in a new graph and start exploring the nearest nodes from there. The idea behind the Music Cloud is to create a visualization of a simplified genre recommender system inspired by larger and more complex systems used by Last.fm or Spotify.</p>
+
+<h2>Method</h2>
+<p>This visualization was built using the Last.fm subset of the <a href="https://labrosa.ee.columbia.edu/millionsong/lastfm">Million Song dataset</a>. Due to lack of computational power we only worked on the test set consisting of approximately 20.000 songs. Each song was made up of a json object consisting of different features (title, artist, tag, etc.). The title, artist and tags (a tag consists of a tag name and a score i.e. Hip-Hop: 20) were extracted from each song and preprocessed using Python. The 500 most frequent tags were extracted from the data and used to create a 'tag vector' for each song. This vector consisted of the tag scores for each of the tags and sorted by a fixed index (i.e. a vector as such [10, 20, 30, ...] means the song has scored 10 in rock, 20 in pop and 30 in hiphop and so on). Duplicates and all songs with fewer tags than 10 were then removed from the data. A spatial tree (k-d tree) were created using the remaining songs (6817). All songs were then queried against the spatial tree and the 10 nearest vectors of the query vector were returned. This resulted in a list of 6817 json objects with artist/song and 10 most similar songs, making it possible to create a dynamic interactive graph like visualization.</p>
+
+
 </body>
 </html>

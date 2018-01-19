@@ -149,6 +149,10 @@ d3.select(window).on('load', () => {
       const svg_node_elements = svg_node.enter()
         .append("g")
         .attr("class", "node")
+        .on("mouseover", handleMouseOver)
+        .on("mousemove", function(){return tooltip.style("top",
+          (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
+        .on("mouseout", handleMouseOut)
         .on("click", d => {
           expandNode(d)
           drawGraph()
@@ -170,7 +174,40 @@ d3.select(window).on('load', () => {
 
     expandNode(nodes[0])
   });
+
+
+  // Mouse handlers
+  function handleMouseOver(d) {  // Add interactivity
+        tooltip.style("visibility", "visible"),
+        tooltip.text(d.id)
+        //d3.select(this).attr("r", 10).style("fill", "orange");
+      }
+  function handleMouseOut(d) {
+        // Use D3 to select element, change color back to normal
+        console.log(d);
+        tooltip.style("visibility", "hidden")
+        //d3.select(this).attr("r", 5).style("fill", "black");
+        }
+
+  // Tool tip var
+  var tooltip = d3.select("body")
+      .append("div")
+      .style("position", "absolute")
+      .style("z-index", "10")
+      .style("visibility", "hidden")
 });
+
+
+function srch() {
+  var input = document.getElementById("userInput").value;
+  const dbase = songs.map((song,index)=> [song.id,index])
+  const tmp = dbase.filter(song=> song[0].toLowerCase().includes(input.toLowerCase()))
+  const results = tmp.map(song => songs[song[1]])
+  alert(results);
+}
+
+
+
 </script>
 </body>
 </html>

@@ -12,6 +12,15 @@
     <input type="text" id="userInput" />
     <input type="submit"/>
 </form>
+
+
+<select size="10"> 
+       <option value="1">Nirvana - Rape Me</option> 
+       <option value="2">value 2</option> 
+ <select> 
+
+
+
 <svg id="svg"></svg>
 <style>
 h1 {
@@ -92,6 +101,22 @@ d3.select(window).on('load', () => {
     .force("collision", d3.forceCollide(30))
     .force("center", d3.forceCenter(width / 2, height / 2));
 
+  function srch(input, songs) {
+    const dbase = songs.map((song,index)=> [song.id,index])
+    const tmp = dbase.filter(song=> song[0].toLowerCase().includes(input.toLowerCase()))
+    const results = tmp.map(song => songs[song[1]])
+    i = 0,
+    il = results.length;
+
+    for (; i < il; i += 1) {
+    option = document.createElement('option');
+    option.setAttribute('value', results[i].value);
+    option.appendChild(document.createTextNode(results[i].text));
+    document.getElementById("select").appendChild(option)
+    }
+    return results;
+  }
+
   d3.json("output.json", (error, songs) => {
     if (error) throw error;
     //const scalex = d3.scaleLinear().domain([d3.min(tags, d => d.x), d3.max(tags, d => d.x)]).range([padding, width - padding]) // scale x
@@ -99,6 +124,8 @@ d3.select(window).on('load', () => {
 
     d3.select("#form").on("submit", form => {
       const searchString = d3.select("#userInput").node().value
+      console.log(srch(searchString,songs))
+
       // Call the srch here!
     })
 
@@ -193,15 +220,9 @@ d3.select(window).on('load', () => {
 });
 
 
-function srch(input, songs) {
-  const dbase = songs.map((song,index)=> [song.id,index])
-  const tmp = dbase.filter(song=> song[0].toLowerCase().includes(input.toLowerCase()))
-  const results = tmp.map(song => songs[song[1]])
-  return results;
-}
 
-
-
+</script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js">
 </script>
 </body>
 </html>

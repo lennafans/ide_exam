@@ -8,18 +8,12 @@
   <body>
 <h1>Music cloud</h1>
 <p>nbs151 (Dan Graakjær)   and   xtp778 (Jens Egholm)</p>
-<form id="form" onsubmit="return false;">
-    <input type="text" id="userInput" />
+<form onsubmit="return false;" id="form">
+    <label for="userInput">Search: </label>
+    <input type="text" id="userInput" list="suggestions" placeholder="Search for a song..."/>
     <input type="submit"/>
+    <datalist id="suggestions"></datalist>
 </form>
-
-
-<select size="10"> 
-       <option value="1">Nirvana - Rape Me</option> 
-       <option value="2">value 2</option> 
- <select> 
-
-
 
 <svg id="svg"></svg>
 <style>
@@ -101,37 +95,12 @@ d3.select(window).on('load', () => {
     .force("collision", d3.forceCollide(30))
     .force("center", d3.forceCenter(width / 2, height / 2));
 
-  function srch(input, songs) {
-    const dbase = songs.map((song,index)=> [song.id,index])
-    const tmp = dbase.filter(song=> song[0].toLowerCase().includes(input.toLowerCase()))
-    const results = tmp.map(song => songs[song[1]])
-    i = 0,
-    il = results.length;
-
-    for (; i < il; i += 1) {
-    option = document.createElement('option');
-    option.setAttribute('value', results[i].value);
-    option.appendChild(document.createTextNode(results[i].text));
-    document.getElementById("select").appendChild(option)
-    }
-    return results;
-  }
-
   d3.json("output.json", (error, songs) => {
     if (error) throw error;
-    //const scalex = d3.scaleLinear().domain([d3.min(tags, d => d.x), d3.max(tags, d => d.x)]).range([padding, width - padding]) // scale x
-    //const scaley = d3.scaleLinear().domain([d3.min(tags, d => d.y), d3.max(tags, d => d.y)]).range([padding, height - padding]) // scale y
 
-    d3.select("#form").on("submit", form => {
-      const searchString = d3.select("#userInput").node().value
-      console.log(srch(searchString,songs))
-
-      // Call the srch here!
-    })
-
-    const nodeSet = new Set();
-    const nodes = [songs[0]];
-    const links = [];
+    var nodeSet = new Set();
+    var nodes = [songs[0]];
+    var links = [];
     function expandNode(node) {
       if (!node.hasOwnProperty('visited')) {
         const link = links[node.index]
@@ -211,11 +180,44 @@ d3.select(window).on('load', () => {
         .attr("class", d => "node " + (d.visited ? "expanded" : "closed"))
       svg.selectAll("circle")
         .attr("r", d => d.visited ? 13 : 12)
-      // Update selected nodes to show full text
 
     };
 
     expandNode(nodes[0])
+
+    // Prepare searching
+    const suggestions = document.getElementById("suggestions");
+    songs.forEach(song => {
+      const option = document.createElement("option");
+      option.value = song.id
+      suggestions.appendChild(option)
+    })
+    document.getElementById("form").addEventListener("submit", form => {
+      const songTitle = form.target[0].value
+      const hit = songs.find(song => song.id == songTitle)
+      if (hit) {
+        // clear graph data
+        nodeSet = new Set();
+        nodes = [hit];
+        links = [];
+        // clear svg data
+        svg_link.remove()
+        svg_node.remove()
+
+        svg_link = svg.append("g")
+          .attr("class", "links")
+          .selectAll(".link")
+        svg_node = svg.append("g")
+          .attr("class", "nodes")
+          .selectAll(".node")
+
+        expandNode(hit)
+      } else {
+        const input = document.getElementById("userInput")
+        input.value = ""
+        input.placeholder = "No song found, please try again"
+      }
+    })
   });
 });
 

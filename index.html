@@ -23,6 +23,14 @@ width: 60vw;
 #svg {
 margin-left: -20vw;
 }
+.links line {
+  stroke: #999;
+  stroke-opacity: 0.6;
+}
+.nodes circle {
+  stroke: #fff;
+  stroke-width: 1.5px;
+}
 </style>
 <script type="text/javascript">
 d3.select(window).on('load', () => {
@@ -35,19 +43,67 @@ d3.select(window).on('load', () => {
     .attr("height", height)
   const g = svg.append("g")
 
-  d3.json("tags.json", tags => {
-    const scaler_genre = d3.scaleLinear().domain([d3.min(tags, d => d.n), d3.max(tags, d => d.n)]).range([2, 30]) // scale radius
-    const scalex_genre = d3.scaleLinear().domain([d3.min(tags, d => d.x), d3.max(tags, d => d.x)]).range([padding, width - padding]) // scale x
-    const scaley_genre = d3.scaleLinear().domain([d3.min(tags, d => d.y), d3.max(tags, d => d.y)]).range([padding, height - padding]) // scale y
-    g.selectAll("circle")
-     .data(tags)
-     .enter()
-     .append('circle')
-     .attr('cx', d => scalex_genre(d.x))
-     .attr('cy', d => scaley_genre(d.y))
-     .attr('r', d => scaler_genre(d.n))
-     .append("svg:title")
-     .text(d => d.name)
+  const simulation = d3.forceSimulation()
+    .force("link", d3.forceLink().id(d => d.id))
+    .force("charge", d3.forceManyBody())
+    .force("center", d3.forceCenter(width / 2, height / 2));
+
+  const drawGraph = (nodes, links) => {
+    const link = g.attr("class", "links")
+      .selectAll("line")
+      .data(links)
+      .enter()
+      .append("line")
+      .attr("stroke-width", 2);
+    const node = svg.append("g")
+      .attr("class", "nodes")
+      .selectAll("circle")
+      .data(nodes)
+      .enter().append("circle")
+      .attr("r", 5)
+      .attr("fill", "black") //function(d) { return color(d.group); })
+      // .call(d3.drag()
+      //     .on("start", dragstarted)
+      //     .on("drag", dragged)
+      //     .on("end", dragended));
+
+    node.append("title").text(d => d.id);
+    simulation.nodes(nodes).on("tick", ticked);
+    simulation.force("link").links(links);
+
+    function ticked() {
+      link
+          .attr("x1", function(d) { return d.source.x; })
+          .attr("y1", function(d) { return d.source.y; })
+          .attr("x2", function(d) { return d.target.x; })
+          .attr("y2", function(d) { return d.target.y; });
+
+      node
+          .attr("cx", function(d) { return d.x; })
+          .attr("cy", function(d) { return d.y; });
+    }
+  };
+
+  d3.json("songs.json", (error, songs) => {
+    if (error) throw error;
+    //const scalex = d3.scaleLinear().domain([d3.min(tags, d => d.x), d3.max(tags, d => d.x)]).range([padding, width - padding]) // scale x
+    //const scaley = d3.scaleLinear().domain([d3.min(tags, d => d.y), d3.max(tags, d => d.y)]).range([padding, height - padding]) // scale y
+
+    const start = songs[0];
+    const nodeSet = new Set();
+    const nodes = [start];
+    const links = start.similars
+      .map(t => {
+        const target = songs[t[1]]
+        // Insert the song as a node (if it doesn't already exist) and
+        // return all the links
+        if (!nodeSet.has(target.id)) {
+          nodeSet.add(target.id)
+          nodes.push(target)
+        }
+        return {distance: t[0], source: start, "target": target}
+      });
+    drawGraph(nodes, links)
   });
 });
 </script>

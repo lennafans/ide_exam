@@ -44,7 +44,7 @@ d3.select(window).on('load', () => {
   const g = svg.append("g")
 
   const simulation = d3.forceSimulation()
-    .force("link", d3.forceLink().id(d => d.id))
+    .force("link", d3.forceLink().id(d => d.id).distance(d => d.distance))
     .force("charge", d3.forceManyBody())
     .force("center", d3.forceCenter(width / 2, height / 2));
 
@@ -89,21 +89,28 @@ d3.select(window).on('load', () => {
     //const scalex = d3.scaleLinear().domain([d3.min(tags, d => d.x), d3.max(tags, d => d.x)]).range([padding, width - padding]) // scale x
     //const scaley = d3.scaleLinear().domain([d3.min(tags, d => d.y), d3.max(tags, d => d.y)]).range([padding, height - padding]) // scale y
 
-    const start = songs[0];
     const nodeSet = new Set();
-    const nodes = [start];
-    const links = start.similars
-      .map(t => {
-        const target = songs[t[1]]
-        // Insert the song as a node (if it doesn't already exist) and
-        // return all the links
-        if (!nodeSet.has(target.id)) {
-          nodeSet.add(target.id)
-          nodes.push(target)
-        }
-        return {distance: t[0], source: start, "target": target}
-      });
-    drawGraph(nodes, links)
+    const nodes = [songs[0]];
+    const links = [];
+    function expandNode(node) {
+      if (!node.hasOwnProperty('visited')) {
+        node.similars.map(t => {
+            const target = songs[t[1]]
+            // Insert the song as a node (if it doesn't already exist) and
+            // return all the links
+            if (!nodeSet.has(target.id)) {
+              nodeSet.add(target.id)
+              nodes.push(target)
+              links.push({distance: t[0], source: node, "target": target})
+            }
+          });
+        node['visited'] = true;
+        drawGraph(nodes, links)
+      }
+    }
+
+    expandNode(nodes[0])
+
   });
 });
 </script>

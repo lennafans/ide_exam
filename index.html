@@ -183,7 +183,7 @@ d3.select(window).on('load', () => {
       svg.selectAll(".node")
         .attr("class", d => "node " + (d.visited ? "expanded" : "closed"))
       svg.selectAll("circle")
-        .attr("r", d => d.visited ? 17 : 12)
+        .attr("r", d => d.visited ? 13 : 12)
       // Update selected nodes to show full text
 
     };

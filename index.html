@@ -84,7 +84,7 @@ d3.select(window).on('load', () => {
     }
   };
 
-  d3.json("songs.json", (error, songs) => {
+  d3.json("output.json", (error, songs) => {
     if (error) throw error;
     //const scalex = d3.scaleLinear().domain([d3.min(tags, d => d.x), d3.max(tags, d => d.x)]).range([padding, width - padding]) // scale x
     //const scaley = d3.scaleLinear().domain([d3.min(tags, d => d.y), d3.max(tags, d => d.y)]).range([padding, height - padding]) // scale y

@@ -10,12 +10,10 @@
   <body>
 <h1>Music cloud</h1>
 <p>nbs151 (Dan Graakjær)   and   xtp778 (Jens Egholm)</p>
-
 <form id="form" onsubmit="return false;">
     <input type="text" id="userInput" />
-    <input type="submit" onclick="srch();" />
+    <input type="submit"/>
 </form>
-
 <svg id="svg"></svg>
 <style>
 h1 {
@@ -95,6 +93,11 @@ d3.select(window).on('load', () => {
     if (error) throw error;
     //const scalex = d3.scaleLinear().domain([d3.min(tags, d => d.x), d3.max(tags, d => d.x)]).range([padding, width - padding]) // scale x
     //const scaley = d3.scaleLinear().domain([d3.min(tags, d => d.y), d3.max(tags, d => d.y)]).range([padding, height - padding]) // scale y
+
+    d3.select("#form").on("submit", form => {
+      const searchString = d3.select("#userInput").node().value
+      // Call the srch here!
+    })
 
     const nodeSet = new Set();
     const nodes = [songs[0]];
@@ -183,12 +186,11 @@ d3.select(window).on('load', () => {
 });
 
 
-function srch() {
-  var input = document.getElementById("userInput").value;
+function srch(input, songs) {
   const dbase = songs.map((song,index)=> [song.id,index])
   const tmp = dbase.filter(song=> song[0].toLowerCase().includes(input.toLowerCase()))
   const results = tmp.map(song => songs[song[1]])
-  alert(results);
+  return results;
 }
 
 

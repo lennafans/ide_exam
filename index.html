@@ -27,20 +27,24 @@ margin-left: -20vw;
   stroke: #999;
   stroke-opacity: 0.6;
 }
-.nodes circle {
+.node circle {
   stroke: #fff;
   stroke-width: 1.5px;
 }
-circle.node.expanded {
+.node.expanded circle {
   fill: #DD9611;
 }
-circle.node.closed {
+.node.closed circle {
   fill: #622;
   stroke: #ccc;
   stroke-width: 6px;
 }
-circle.node.closed:hover {
+.node.closed:hover {
   cursor: pointer;
+}
+.node.closed text {
+  color: rgba(0, 0, 0, 0.1);
+  font-size: 0.7rem;
 }
 </style>
 <script type="text/javascript">
@@ -69,12 +73,12 @@ d3.select(window).on('load', () => {
   const simulation = d3.forceSimulation()
     .force("link", d3.forceLink()
       .id(function(d) { return d.id; })
-      .distance(d => d.distance)
+      .distance(d => d.distance * 1.5)
       .iterations(1))
     .force("charge", d3.forceManyBody()
       .strength(-100)
       .distanceMin(30))
-    .force("collission", d3.forceCollide(20))
+    .force("collission", d3.forceCollide(30))
     .force("center", d3.forceCenter(width / 2, height / 2));
 
   d3.json("output.json", (error, songs) => {
@@ -121,8 +125,7 @@ d3.select(window).on('load', () => {
           .attr("y2", d => d.target.y);
 
       svg_node
-          .attr("cx", d => d.x)
-          .attr("cy", d => d.y);
+          .attr("transform", d => "translate("+d.x+","+d.y+")")
     }
 
     function drawGraph() {
@@ -143,20 +146,26 @@ d3.select(window).on('load', () => {
 
       // Create nodes
       svg_node = svg_node.data(nodes);
-      const svg_node_elements = svg_node.enter().append("circle")
+      const svg_node_elements = svg_node.enter()
+        .append("g")
         .attr("class", "node")
-        .attr("fill", "black") //function(d) { return color(d.group); })
         .on("click", d => {
           expandNode(d)
           drawGraph()
         })
-      svg_node_elements.append("title").text(d => d.id);
+      svg_node_elements.append("circle")
+        .attr("fill", "black") //function(d) { return color(d.group); })
+      svg_node_elements.append("text")
+        .text(d => d.id)
+        .attr("x", d => - 7 - d.id.length * 3)
+        .attr("y", -20)
       svg_node = svg_node_elements.merge(svg_node)
 
       // Update nodes
       svg.selectAll(".node")
         .attr("class", d => "node " + (d.visited ? "expanded" : "closed"))
-        .attr("r", d => d.visited ? 12 : 10)
+      svg.selectAll("circle")
+        .attr("r", d => d.visited ? 17 : 12)
     };
 
     expandNode(nodes[0])

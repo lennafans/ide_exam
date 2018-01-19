@@ -31,6 +31,9 @@ margin-left: -20vw;
   stroke: #fff;
   stroke-width: 1.5px;
 }
+circle.node.expanded {
+  fill: orange;
+}
 </style>
 <script type="text/javascript">
 d3.select(window).on('load', () => {
@@ -42,12 +45,12 @@ d3.select(window).on('load', () => {
     .attr("width", width)
     .attr("height", height)
 
-  var svg_node = svg.append("g")
-    .attr("class", "nodes")
-    .selectAll(".node")
   var svg_link = svg.append("g")
     .attr("class", "links")
     .selectAll(".link")
+  var svg_node = svg.append("g")
+    .attr("class", "nodes")
+    .selectAll(".node")
 
   const simulation = d3.forceSimulation()
     .force("link", d3.forceLink()
@@ -88,8 +91,8 @@ d3.select(window).on('load', () => {
                 target.y = (Math.random() - 0.5) * 40
               }
               nodes.push(target)
-              links.push({distance: t[0], source: node, "target": target})
             }
+            links.push({distance: t[0], source: node, "target": target})
           });
         node['visited'] = true;
         drawGraph()
@@ -127,8 +130,7 @@ d3.select(window).on('load', () => {
       // Create nodes
       svg_node = svg_node.data(nodes);
       const svg_node_elements = svg_node.enter().append("circle")
-        .attr('class', 'node')
-        .attr("r", 5)
+        .attr("class", "node")
         .attr("fill", "black") //function(d) { return color(d.group); })
         .on("click", d => {
           expandNode(d)
@@ -137,6 +139,10 @@ d3.select(window).on('load', () => {
       svg_node_elements.append("title").text(d => d.id);
       svg_node = svg_node_elements.merge(svg_node)
 
+      // Update nodes
+      svg.selectAll(".node")
+        .attr("class", d => "node " + (d.visited ? "expanded" : "closed"))
+        .attr("r", d => d.visited ? 10 : 5)
     };
 
     expandNode(nodes[0])

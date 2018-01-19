@@ -49,6 +49,14 @@ d3.select(window).on('load', () => {
     .attr("class", "links")
     .selectAll(".link")
 
+  const simulation = d3.forceSimulation()
+    .force("link", d3.forceLink()
+      .id(function(d) { return d.id; })
+      .distance(d => d.distance)
+      .iterations(100))
+    .force("charge", d3.forceManyBody().strength(-100).distanceMin(30))
+    .force("center", d3.forceCenter(width / 2, height / 2));
+
   d3.json("output.json", (error, songs) => {
     if (error) throw error;
     //const scalex = d3.scaleLinear().domain([d3.min(tags, d => d.x), d3.max(tags, d => d.x)]).range([padding, width - padding]) // scale x
@@ -65,6 +73,8 @@ d3.select(window).on('load', () => {
             // return all the links
             if (!nodeSet.has(target.id) && target.id != node.id) {
               nodeSet.add(target.id)
+              target.x = node.x + Math.random() * 20
+              target.y = node.y + Math.random() * 20
               nodes.push(target)
               links.push({distance: t[0], source: node, "target": target})
             }
@@ -87,15 +97,11 @@ d3.select(window).on('load', () => {
     }
 
     function drawGraph() {
-      const simulation = d3.forceSimulation()
-        .force("link", d3.forceLink().id(d => d.id).distance(d => d.distance))
-        .force("charge", d3.forceManyBody())
-        .force("center", d3.forceCenter(width / 2, height / 2));
 
       // Restart simulation
       var shouldRender = true;
-      simulation.force("link").links(links);
       simulation.nodes(nodes).on("tick", ticked);
+      simulation.force("link").links(links);
 
       // Create links
       svg_link = svg_link.data(links);
@@ -118,10 +124,6 @@ d3.select(window).on('load', () => {
       svg_node_elements.append("title").text(d => d.id);
       svg_node = svg_node_elements.merge(svg_node)
 
-        // .call(d3.drag()
-        //     .on("start", dragstarted)
-        //     .on("drag", dragged)
-        //     .on("end", dragended));
     };
 
     expandNode(nodes[0])

@@ -9,7 +9,6 @@
 <h1>Music cloud</h1>
 <p>nbs151 (Dan Graakjær)   and   xtp778 (Jens Egholm)</p>
 <form onsubmit="return false;" id="form">
-    <label for="userInput">Search: </label>
     <input type="text" id="userInput" list="suggestions" placeholder="Search for a song..."/>
     <input type="submit"/>
     <datalist id="suggestions"></datalist>
@@ -27,6 +26,9 @@ width: 60vw;
 }
 #svg {
 margin-left: -20vw;
+}
+#userInput {
+  width: 50%;
 }
 .links line {
   stroke: #999;
